@@ -1,11 +1,16 @@
 import { Router } from "express";
 import authService from "./auth.service";
 import { validation } from "../../Middlewares/validation.middleware";
-import { signupSchema } from "./auth.validation";
+import { confirmEmailSchema, signupSchema } from "./auth.validation";
 
 const router = Router();
 
-router.get("/signup", validation(signupSchema), authService.signup);
-router.get("/login", authService.login);
+router.post("/signup", validation(signupSchema), authService.signup);
+router.post("/login", authService.login);
+router.patch(
+  "/confirm-email",
+  validation(confirmEmailSchema),
+  authService.confirmEmail
+);
 
 export default router;

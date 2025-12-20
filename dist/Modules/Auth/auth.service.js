@@ -1,16 +1,94 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const user_model_1 = require("../../DB/models/user.model");
+const error_response_1 = require("../../Utils/response/error.response");
+const user_repository_1 = require("../../DB/repository/user.repository");
+const hash_1 = require("../../Utils/security/hash");
+const generateOTP_1 = require("../../Utils/generateOTP");
+const email_events_1 = require("../../Utils/events/email.events");
+const token_1 = require("../../Utils/security/token");
 class AuthenticationService {
+    _usermodel = new user_repository_1.UserRepository(user_model_1.UserModel);
     constructor() { }
     signup = async (req, res) => {
-        const { username, email, password, confirmPassword } = req.body;
-        console.log({ username, email, password, confirmPassword });
-        return res.status(201).json({ message: "User Created Successfully" });
+        const { username, email, password } = req.body;
+        const checkUser = await this._usermodel.findOne({
+            filter: { email },
+            select: "email",
+        });
+        if (checkUser)
+            throw new error_response_1.ConflictException("User Already exists");
+        const otp = (0, generateOTP_1.generateOTP)();
+        const user = await this._usermodel.createUser({
+            data: [
+                {
+                    username,
+                    email,
+                    password: await (0, hash_1.generateHash)(password),
+                    confirmEmailOTP: await (0, hash_1.generateHash)(otp),
+                },
+            ],
+            options: { validateBeforeSave: true },
+        });
+        await email_events_1.emailEvent.emit("confirmEmail", {
+            to: email,
+            username,
+            otp,
+        });
+        if (!user)
+            throw new error_response_1.BadRequestException("User not created");
+        return res.status(201).json({ message: "User Created Successfully", user });
     };
-    login = (req, res) => {
+    login = async (req, res) => {
         const { email, password } = req.body;
-        console.log({ email, password });
-        return res.status(200).json({ message: "User Logged in Successfully" });
+        const user = await this._usermodel.findOne({ filter: { email } });
+        if (!user)
+            throw new error_response_1.NotFoundException("User Not Found");
+        if (!user.confirmedAt)
+            throw new error_response_1.BadRequestException("Verify Your Account");
+        if (!(0, hash_1.compareHash)(password, user.password))
+            throw new error_response_1.BadRequestException("Invalid Input");
+        const accessToken = await (0, token_1.generateToken)({
+            payload: { _id: user._id },
+            secret: "ljvnpifgvpibvipqefv",
+            options: {
+                expiresIn: 3600,
+            },
+        });
+        const refreshToken = await (0, token_1.generateToken)({
+            payload: { _id: user._id },
+            secret: "jpihpfjafjaoifh",
+            options: {
+                expiresIn: 3600,
+            },
+        });
+        return res
+            .status(200)
+            .json({
+            message: "User Logged in Successfully",
+            data: { accessToken, refreshToken },
+        });
+    };
+    confirmEmail = async (req, res) => {
+        const { email, otp } = req.body;
+        const user = await this._usermodel.findOne({
+            filter: {
+                email,
+                confirmEmailOTP: { $exists: true },
+                confirmedAt: { $exists: false },
+            },
+        });
+        if (!user) {
+            throw new error_response_1.BadRequestException("User not found");
+        }
+        if (!(0, hash_1.compareHash)(otp, user?.confirmEmailOTP)) {
+            throw new error_response_1.BadRequestException("Invalid Otp");
+        }
+        await this._usermodel.updateOne({
+            filter: { email },
+            update: { confirmedAt: new Date(), $unset: { confirmEmailOTP: true } },
+        });
+        return res.status(200).json({ message: "User Confirmed Successfully" });
     };
 }
 exports.default = new AuthenticationService();

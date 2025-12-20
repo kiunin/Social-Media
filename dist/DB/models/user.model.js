@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.userModel = exports.userSchema = exports.roleEnum = exports.genderEnum = void 0;
+exports.UserModel = exports.userSchema = exports.roleEnum = exports.genderEnum = void 0;
 const mongoose_1 = require("mongoose");
 var genderEnum;
 (function (genderEnum) {
@@ -42,4 +42,4 @@ exports.userSchema
     .get(function () {
     return `${this.firstName} ${this.lastName}`;
 });
-exports.userModel = mongoose_1.models.user || (0, mongoose_1.model)("User", exports.userSchema);
+exports.UserModel = mongoose_1.models.user || (0, mongoose_1.model)("User", exports.userSchema);

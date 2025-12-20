@@ -1,5 +1,5 @@
-import { models, Schema, model, Types } from "mongoose";
-import { string } from "zod";
+import { models, Schema, model, Types, HydratedDocument } from "mongoose";
+
 export enum genderEnum {
   MALE = "MALE",
   FEMALE = "FEMALE",
@@ -14,7 +14,7 @@ export interface IUser {
   _id: Types.ObjectId;
   firstName: string;
   lastName: string;
-  userName?: string;
+  username?: string;
 
   email: string;
   confirmEmailOTP?: string;
@@ -67,4 +67,5 @@ userSchema
     return `${this.firstName} ${this.lastName}`;
   });
 
-export const userModel = models.user || model("User", userSchema);
+export const UserModel = models.user || model("User", userSchema);
+export type HUserDocument = HydratedDocument<IUser>;

@@ -8,6 +8,13 @@ export const loginSchema = {
   }),
 };
 
+export const confirmEmailSchema = {
+  body: z.strictObject({
+    email: generalFields.email,
+    otp: generalFields.otp,
+  }),
+};
+
 export const signupSchema = {
   body: loginSchema.body
     .extend({

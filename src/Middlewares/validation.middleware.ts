@@ -40,4 +40,5 @@ export const generalFields = {
   email: z.email({ error: "invalid email address" }),
   password: z.string(),
   confirmPassword: z.string(),
+  otp: z.string().regex(/^\d{6}$/),
 };
