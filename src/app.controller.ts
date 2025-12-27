@@ -7,6 +7,7 @@ import path from "node:path";
 import { config } from "dotenv";
 config({ path: path.resolve("./config/.env.dev") });
 import authRouter from "./Modules/Auth/auth.controller";
+import userRouter from "./Modules/User/user.controller";
 import { globalErrorHandler } from "./Utils/response/error.response";
 import connectDB from "./DB/connection";
 
@@ -27,6 +28,7 @@ export const bootstrap = async () => {
   app.use(limiter);
   await connectDB();
   app.use("/api/v1/auth", authRouter);
+  app.use("/api/v1/user", userRouter);
 
   app.get("/", (req: Request, res: Response) => {
     res.status(200).json({ message: "Welcome to Social Media app" });

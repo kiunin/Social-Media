@@ -12,6 +12,7 @@ const node_path_1 = __importDefault(require("node:path"));
 const dotenv_1 = require("dotenv");
 (0, dotenv_1.config)({ path: node_path_1.default.resolve("./config/.env.dev") });
 const auth_controller_1 = __importDefault(require("./Modules/Auth/auth.controller"));
+const user_controller_1 = __importDefault(require("./Modules/User/user.controller"));
 const error_response_1 = require("./Utils/response/error.response");
 const connection_1 = __importDefault(require("./DB/connection"));
 const limiter = (0, express_rate_limit_1.default)({
@@ -29,6 +30,7 @@ const bootstrap = async () => {
     app.use(limiter);
     await (0, connection_1.default)();
     app.use("/api/v1/auth", auth_controller_1.default);
+    app.use("/api/v1/user", user_controller_1.default);
     app.get("/", (req, res) => {
         res.status(200).json({ message: "Welcome to Social Media app" });
     });

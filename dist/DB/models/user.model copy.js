@@ -18,7 +18,6 @@ exports.userSchema = new mongoose_1.Schema({
     email: { type: String, requried: true, unique: true },
     confirmEmailOTP: String,
     confirmedAt: Date,
-    changeCredentialsTime: Date,
     password: { type: String, requried: true },
     resetPasswordOTP: String,
     phone: String,

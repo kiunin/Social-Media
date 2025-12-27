@@ -19,6 +19,7 @@ export interface IUser {
   email: string;
   confirmEmailOTP?: string;
   confirmedAt?: Date;
+  changeCredentialsTime: Date;
 
   password: string;
   resetPasswordOTP?: string;
@@ -27,6 +28,7 @@ export interface IUser {
   address?: string;
   gender: genderEnum;
   role: roleEnum;
+  profileImage: string;
 
   createdAt: Date;
   updatedAt?: Date;
@@ -39,6 +41,7 @@ export const userSchema = new Schema<IUser>(
     email: { type: String, requried: true, unique: true },
     confirmEmailOTP: String,
     confirmedAt: Date,
+    changeCredentialsTime: Date,
     password: { type: String, requried: true },
     resetPasswordOTP: String,
     phone: String,
@@ -49,6 +52,7 @@ export const userSchema = new Schema<IUser>(
       enum: Object.values(roleEnum),
       default: roleEnum.USER,
     },
+    profileImage: String,
   },
   {
     timestamps: true,

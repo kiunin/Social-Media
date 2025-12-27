@@ -48,25 +48,10 @@ class AuthenticationService {
             throw new error_response_1.BadRequestException("Verify Your Account");
         if (!(0, hash_1.compareHash)(password, user.password))
             throw new error_response_1.BadRequestException("Invalid Input");
-        const accessToken = await (0, token_1.generateToken)({
-            payload: { _id: user._id },
-            secret: "ljvnpifgvpibvipqefv",
-            options: {
-                expiresIn: 3600,
-            },
-        });
-        const refreshToken = await (0, token_1.generateToken)({
-            payload: { _id: user._id },
-            secret: "jpihpfjafjaoifh",
-            options: {
-                expiresIn: 3600,
-            },
-        });
-        return res
-            .status(200)
-            .json({
+        const credentials = await (0, token_1.createLoginCredentials)(user);
+        return res.status(200).json({
             message: "User Logged in Successfully",
-            data: { accessToken, refreshToken },
+            credentials,
         });
     };
     confirmEmail = async (req, res) => {
