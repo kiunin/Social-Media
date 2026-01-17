@@ -1,4 +1,16 @@
-import { models, Schema, model, Types, HydratedDocument } from "mongoose";
+import {
+  models,
+  Schema,
+  model,
+  Types,
+  HydratedDocument,
+  UpdateQuery,
+} from "mongoose";
+import { BadRequestException } from "../../Utils/response/error.response";
+import { generateHash } from "../../Utils/security/hash";
+import { emailEvent } from "../../Utils/events/email.events";
+import { TokenRepository } from "../repository/token.repository";
+import { TokenModel } from "./token.model";
 
 export enum genderEnum {
   MALE = "MALE",
@@ -15,6 +27,7 @@ export interface IUser {
   firstName: string;
   lastName: string;
   username?: string;
+  slug: string;
 
   email: string;
   confirmEmailOTP?: string;
@@ -38,6 +51,7 @@ export const userSchema = new Schema<IUser>(
   {
     firstName: { type: String, requried: true, minLength: 2, maxLength: 25 },
     lastName: { type: String, requried: true, minLength: 2, maxLength: 25 },
+    slug: { type: String, requried: true, minLength: 2, maxLength: 51 },
     email: { type: String, requried: true, unique: true },
     confirmEmailOTP: String,
     confirmedAt: Date,
@@ -65,11 +79,41 @@ userSchema
   .virtual("username")
   .set(function (value: string) {
     const [firstName, lastName] = value.split(" ") || [];
-    this.set({ firstName, lastName });
+    this.set({ firstName, lastName, slug: value.replaceAll(/\s+/g, "-") });
   })
   .get(function () {
     return `${this.firstName} ${this.lastName}`;
   });
 
+userSchema.pre(
+  "save",
+  async function (
+    this: HUserDocument & { wasNew: boolean; confirmEmailPlainOTP?: string },
+    next
+  ) {
+    this.wasNew = this.isNew;
+    if (this.isModified("password")) {
+      this.password = await generateHash(this.password);
+    }
+    if (this.isModified("confirmEmailOTP")) {
+      this.confirmEmailPlainOTP = this.confirmEmailOTP as string;
+      this.confirmEmailOTP = await generateHash(this.confirmEmailOTP as string);
+    }
+  }
+);
+
+userSchema.post("save", async function (doc, next) {
+  const that = this as unknown as HUserDocument & {
+    wasNew: boolean;
+    confirmEmailPlainOTP?: string;
+  };
+  if (that.wasNew && that.confirmEmailPlainOTP) {
+    await emailEvent.emit("confirmEmail", {
+      to: this.email,
+      uesrname: this.username,
+      otp: that.confirmEmailPlainOTP,
+    });
+  }
+});
 export const UserModel = models.user || model("User", userSchema);
 export type HUserDocument = HydratedDocument<IUser>;

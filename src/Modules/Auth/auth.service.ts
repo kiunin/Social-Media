@@ -30,16 +30,11 @@ class AuthenticationService {
         {
           username,
           email,
-          password: await generateHash(password),
-          confirmEmailOTP: await generateHash(otp),
+          password,
+          confirmEmailOTP: `${otp}`,
         },
       ],
       options: { validateBeforeSave: true },
-    });
-    await emailEvent.emit("confirmEmail", {
-      to: email,
-      username,
-      otp,
     });
 
     if (!user) throw new BadRequestException("User not created");
