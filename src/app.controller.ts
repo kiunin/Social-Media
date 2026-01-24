@@ -8,6 +8,7 @@ import { config } from "dotenv";
 config({ path: path.resolve("./config/.env.dev") });
 import authRouter from "./Modules/Auth/auth.controller";
 import userRouter from "./Modules/User/user.controller";
+import postRouter from "./Modules/Post/post.controller";
 import { promisify } from "node:util";
 import { pipeline } from "node:stream";
 import {
@@ -21,9 +22,6 @@ import {
   deleteFiles,
   getFile,
 } from "./Utils/multer/s3.config";
-import { UserModel } from "./DB/models/user.model";
-import { generalFields } from "./Middlewares/validation.middleware";
-import { UserRepository } from "./DB/repository/user.repository";
 
 const createS3WriteStreamPipe = promisify(pipeline);
 
@@ -59,17 +57,17 @@ export const bootstrap = async () => {
     if (!s3Response) throw new BadRequestException("Fail to fetch asset");
     res.setHeader(
       "Content-Type",
-      s3Response.ContentType || "application/octet-stream"
+      s3Response.ContentType || "application/octet-stream",
     );
     if (downloadName) {
       res.setHeader(
         "content-disposition",
-        `attachments; filename="${downloadName}"`
+        `attachments; filename="${downloadName}"`,
       );
     }
     return await createS3WriteStreamPipe(
       s3Response.Body as NodeJS.ReadableStream,
-      res
+      res,
     );
   });
 
@@ -87,6 +85,7 @@ export const bootstrap = async () => {
 
   app.use("/api/v1/auth", authRouter);
   app.use("/api/v1/user", userRouter);
+  app.use("/api/v1/post", postRouter);
 
   app.get("/", (req: Request, res: Response) => {
     res.status(200).json({ message: "Welcome to Social Media app" });

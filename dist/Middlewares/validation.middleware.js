@@ -36,12 +36,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.generalFields = exports.validation = void 0;
 const error_response_1 = require("../Utils/response/error.response");
 const z = __importStar(require("zod"));
+const mongoose_1 = require("mongoose");
 const validation = (schema) => {
     return (req, res, next) => {
-        let validationErrors = [];
+        const validationErrors = [];
         for (const key of Object.keys(schema)) {
             if (!schema[key])
                 continue;
+            if (req.file) {
+                req.body.attachments = req.file;
+            }
+            if (req.files) {
+                req.body.attachments = req.files;
+            }
             const validationResults = schema[key].safeParse(req[key]);
             if (!validationResults.success) {
                 const errors = validationResults.error;
@@ -71,4 +78,24 @@ exports.generalFields = {
     password: z.string(),
     confirmPassword: z.string(),
     otp: z.string().regex(/^\d{6}$/),
+    file: function (mimetype) {
+        return z
+            .strictObject({
+            fieldname: z.string(),
+            originalname: z.string(),
+            encoding: z.string(),
+            mimetype: z.enum(mimetype),
+            buffer: z.any().optional(),
+            path: z.string().optional(),
+            size: z.number(),
+        })
+            .refine((data) => {
+            return data.path || data.buffer;
+        }, {
+            error: "Please Provide a File",
+        });
+    },
+    id: z.string().refine((data) => {
+        return mongoose_1.Types.ObjectId.isValid(data);
+    }, { error: "Invalid tag ID" }),
 };

@@ -16,14 +16,14 @@ const router = Router();
 router.get(
   "/profile",
   authentication(TokenTypeEnum.ACCESS, [roleEnum.USER]),
-  userService.getProfile
+  userService.getProfile,
 );
 
 router.post(
   "/logout",
   authentication(TokenTypeEnum.ACCESS, [roleEnum.USER]),
   validation(logoutSchema),
-  userService.logout
+  userService.logout,
 );
 
 router.patch(
@@ -31,11 +31,11 @@ router.patch(
   authentication(TokenTypeEnum.ACCESS, [roleEnum.USER]),
   validation(logoutSchema),
   cloudFileUpload({
-    validation: [...fileValidation.images],
+    validation: [...fileValidation.image],
     storageApproach: storageEnum.MEMORY,
     maxSizeMb: 3,
   }).single("attachments"),
-  userService.profileImage
+  userService.profileImage,
 );
 
 router.patch(
@@ -43,11 +43,11 @@ router.patch(
   authentication(TokenTypeEnum.ACCESS, [roleEnum.USER]),
   validation(logoutSchema),
   cloudFileUpload({
-    validation: [...fileValidation.images],
+    validation: [...fileValidation.image],
     storageApproach: storageEnum.MEMORY,
     maxSizeMb: 3,
   }).array("attachments", 5),
-  userService.coverImage
+  userService.coverImage,
 );
 
 export default router;

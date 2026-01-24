@@ -47,7 +47,7 @@ export const verifyToken = async ({
 };
 
 export const getSignatureLevel = async (
-  role: roleEnum = roleEnum.USER
+  role: roleEnum = roleEnum.USER,
 ): Promise<SignatureLevelEnum> => {
   let signatureLevel: SignatureLevelEnum = SignatureLevelEnum.USER;
   switch (role) {
@@ -66,7 +66,7 @@ export const getSignatureLevel = async (
 };
 
 export const getSignature = async (
-  signatureLevel: SignatureLevelEnum = SignatureLevelEnum.USER
+  signatureLevel: SignatureLevelEnum = SignatureLevelEnum.USER,
 ): Promise<{ access_token: string; refresh_token: string }> => {
   let signature: { access_token: string; refresh_token: string } = {
     access_token: "",
@@ -92,7 +92,7 @@ export const getSignature = async (
 };
 
 export const createLoginCredentials = async (
-  user: HUserDocument
+  user: HUserDocument,
 ): Promise<{ access_token: string; refresh_token: string }> => {
   const signatureLevel = await getSignatureLevel(user.role);
   const signature = await getSignature(signatureLevel);
@@ -148,7 +148,7 @@ export const decodedToken = async ({
 
   const user = await userModel.findOne({ filter: { _id: decoded._id } });
   if (!user) throw new NotFoundException("User Not Found");
-  if (user.changeCredentialsTime?.getTime() || 0 > decoded.iat * 1000) {
+  if (!user.changeCredentialsTime?.getTime() || 0 > decoded.iat * 1000) {
     throw new UnauthorizedException("Logged out of all devices");
   }
 

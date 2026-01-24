@@ -7,9 +7,8 @@ import {
   NotFoundException,
 } from "../../Utils/response/error.response";
 import { UserRepository } from "../../DB/repository/user.repository";
-import { compareHash, generateHash } from "../../Utils/security/hash";
+import { compareHash } from "../../Utils/security/hash";
 import { generateOTP } from "../../Utils/generateOTP";
-import { emailEvent } from "../../Utils/events/email.events";
 import { createLoginCredentials } from "../../Utils/security/token";
 
 class AuthenticationService {

@@ -112,7 +112,7 @@ const decodedToken = async ({ authorization, tokenType = TokenTypeEnum.ACCESS, }
     const user = await userModel.findOne({ filter: { _id: decoded._id } });
     if (!user)
         throw new error_response_1.NotFoundException("User Not Found");
-    if (user.changeCredentialsTime?.getTime() || 0 > decoded.iat * 1000) {
+    if (!user.changeCredentialsTime?.getTime() || 0 > decoded.iat * 1000) {
         throw new error_response_1.UnauthorizedException("Logged out of all devices");
     }
     return { user, decoded };

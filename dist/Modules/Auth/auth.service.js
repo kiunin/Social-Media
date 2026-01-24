@@ -5,7 +5,6 @@ const error_response_1 = require("../../Utils/response/error.response");
 const user_repository_1 = require("../../DB/repository/user.repository");
 const hash_1 = require("../../Utils/security/hash");
 const generateOTP_1 = require("../../Utils/generateOTP");
-const email_events_1 = require("../../Utils/events/email.events");
 const token_1 = require("../../Utils/security/token");
 class AuthenticationService {
     _usermodel = new user_repository_1.UserRepository(user_model_1.UserModel);
@@ -24,16 +23,11 @@ class AuthenticationService {
                 {
                     username,
                     email,
-                    password: await (0, hash_1.generateHash)(password),
-                    confirmEmailOTP: await (0, hash_1.generateHash)(otp),
+                    password,
+                    confirmEmailOTP: `${otp}`,
                 },
             ],
             options: { validateBeforeSave: true },
-        });
-        await email_events_1.emailEvent.emit("confirmEmail", {
-            to: email,
-            username,
-            otp,
         });
         if (!user)
             throw new error_response_1.BadRequestException("User not created");

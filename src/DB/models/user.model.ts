@@ -1,16 +1,6 @@
-import {
-  models,
-  Schema,
-  model,
-  Types,
-  HydratedDocument,
-  UpdateQuery,
-} from "mongoose";
-import { BadRequestException } from "../../Utils/response/error.response";
+import { models, Schema, model, Types, HydratedDocument } from "mongoose";
 import { generateHash } from "../../Utils/security/hash";
 import { emailEvent } from "../../Utils/events/email.events";
-import { TokenRepository } from "../repository/token.repository";
-import { TokenModel } from "./token.model";
 
 export enum genderEnum {
   MALE = "MALE",
@@ -72,7 +62,7 @@ export const userSchema = new Schema<IUser>(
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  }
+  },
 );
 
 userSchema
@@ -89,7 +79,7 @@ userSchema.pre(
   "save",
   async function (
     this: HUserDocument & { wasNew: boolean; confirmEmailPlainOTP?: string },
-    next
+    next,
   ) {
     this.wasNew = this.isNew;
     if (this.isModified("password")) {
@@ -99,7 +89,7 @@ userSchema.pre(
       this.confirmEmailPlainOTP = this.confirmEmailOTP as string;
       this.confirmEmailOTP = await generateHash(this.confirmEmailOTP as string);
     }
-  }
+  },
 );
 
 userSchema.post("save", async function (doc, next) {
@@ -115,5 +105,5 @@ userSchema.post("save", async function (doc, next) {
     });
   }
 });
-export const UserModel = models.user || model("User", userSchema);
+export const UserModel = models.user || model<IUser>("User", userSchema);
 export type HUserDocument = HydratedDocument<IUser>;

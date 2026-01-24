@@ -9,7 +9,7 @@ export enum storageEnum {
   DISK = "DISK",
 }
 export const fileValidation = {
-  images: ["image/png", "image/jpeg", "image/jpg"],
+  image: ["image/png", "image/jpeg", "image/jpg"],
   pdf: ["application/pdf"],
   doc: ["application/msword"],
 };
@@ -36,7 +36,7 @@ export const cloudFileUpload = ({
   function fileFilter(
     req: Request,
     file: Express.Multer.File,
-    cb: FileFilterCallback
+    cb: FileFilterCallback,
   ) {
     if (!validation.includes(file.mimetype)) {
       return cb(new BadRequestException("Invalid File Type"));
