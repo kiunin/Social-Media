@@ -4,14 +4,16 @@ import { authentication } from "../../Middlewares/authentication.middleware";
 import { TokenTypeEnum } from "../../Utils/security/token";
 import { roleEnum } from "../../DB/models/user.model";
 import { validation } from "../../Middlewares/validation.middleware";
-import { logoutSchema } from "./user.validation";
+import { friendRequestSchema, logoutSchema } from "./user.validation";
 import {
   cloudFileUpload,
   fileValidation,
   storageEnum,
 } from "../../Utils/multer/cloud.multer";
+import chatRouter from "../Chat/chat.controller";
 
 const router = Router();
+router.use("/:userId/chat", chatRouter);
 
 router.get(
   "/profile",
@@ -48,6 +50,20 @@ router.patch(
     maxSizeMb: 3,
   }).array("attachments", 5),
   userService.coverImage,
+);
+
+router.post(
+  "/:userId/friend-request",
+  authentication(TokenTypeEnum.ACCESS, [roleEnum.USER]),
+  validation(friendRequestSchema),
+  userService.sendFriendRequest,
+);
+
+router.patch(
+  "/:requestId/accept",
+  authentication(TokenTypeEnum.ACCESS, [roleEnum.USER]),
+  validation(friendRequestSchema),
+  userService.acceptFriendRequest,
 );
 
 export default router;

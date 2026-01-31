@@ -19,6 +19,7 @@ const node_stream_1 = require("node:stream");
 const error_response_1 = require("./Utils/response/error.response");
 const connection_1 = __importDefault(require("./DB/connection"));
 const s3_config_1 = require("./Utils/multer/s3.config");
+const geteway_1 = require("./Modules/Gateway/geteway");
 const createS3WriteStreamPipe = (0, node_util_1.promisify)(node_stream_1.pipeline);
 const limiter = (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000,
@@ -73,8 +74,9 @@ const bootstrap = async () => {
         res.status(404).json({ message: "Handler not found" });
     });
     app.use(error_response_1.globalErrorHandler);
-    app.listen(port, () => {
+    const httpServer = app.listen(port, () => {
         console.log(`Server is running http://localhost:${port}`);
     });
+    (0, geteway_1.initialize)(httpServer);
 };
 exports.bootstrap = bootstrap;

@@ -22,6 +22,7 @@ import {
   deleteFiles,
   getFile,
 } from "./Utils/multer/s3.config";
+import { initialize } from "./Modules/Gateway/geteway";
 
 const createS3WriteStreamPipe = promisify(pipeline);
 
@@ -94,8 +95,8 @@ export const bootstrap = async () => {
     res.status(404).json({ message: "Handler not found" });
   });
   app.use(globalErrorHandler);
-
-  app.listen(port, () => {
+  const httpServer = app.listen(port, () => {
     console.log(`Server is running http://localhost:${port}`);
   });
+  initialize(httpServer);
 };

@@ -24,6 +24,7 @@ exports.userSchema = new mongoose_1.Schema({
     changeCredentialsTime: Date,
     password: { type: String, requried: true },
     resetPasswordOTP: String,
+    friends: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "User" }],
     phone: String,
     address: String,
     gender: { type: String, enum: Object.values(genderEnum) },

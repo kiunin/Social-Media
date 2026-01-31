@@ -27,6 +27,8 @@ export interface IUser {
   password: string;
   resetPasswordOTP?: string;
 
+  friends: Types.ObjectId[];
+
   phone?: string;
   address?: string;
   gender: genderEnum;
@@ -48,6 +50,7 @@ export const userSchema = new Schema<IUser>(
     changeCredentialsTime: Date,
     password: { type: String, requried: true },
     resetPasswordOTP: String,
+    friends: [{ type: Schema.Types.ObjectId, ref: "User" }],
     phone: String,
     address: String,
     gender: { type: String, enum: Object.values(genderEnum) },

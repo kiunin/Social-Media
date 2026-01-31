@@ -11,7 +11,9 @@ const user_model_1 = require("../../DB/models/user.model");
 const validation_middleware_1 = require("../../Middlewares/validation.middleware");
 const user_validation_1 = require("./user.validation");
 const cloud_multer_1 = require("../../Utils/multer/cloud.multer");
+const chat_controller_1 = __importDefault(require("../Chat/chat.controller"));
 const router = (0, express_1.Router)();
+router.use("/:userId/chat", chat_controller_1.default);
 router.get("/profile", (0, authentication_middleware_1.authentication)(token_1.TokenTypeEnum.ACCESS, [user_model_1.roleEnum.USER]), user_service_1.default.getProfile);
 router.post("/logout", (0, authentication_middleware_1.authentication)(token_1.TokenTypeEnum.ACCESS, [user_model_1.roleEnum.USER]), (0, validation_middleware_1.validation)(user_validation_1.logoutSchema), user_service_1.default.logout);
 router.patch("/profile-image", (0, authentication_middleware_1.authentication)(token_1.TokenTypeEnum.ACCESS, [user_model_1.roleEnum.USER]), (0, validation_middleware_1.validation)(user_validation_1.logoutSchema), (0, cloud_multer_1.cloudFileUpload)({
@@ -24,4 +26,6 @@ router.patch("/cover-image", (0, authentication_middleware_1.authentication)(tok
     storageApproach: cloud_multer_1.storageEnum.MEMORY,
     maxSizeMb: 3,
 }).array("attachments", 5), user_service_1.default.coverImage);
+router.post("/:userId/friend-request", (0, authentication_middleware_1.authentication)(token_1.TokenTypeEnum.ACCESS, [user_model_1.roleEnum.USER]), (0, validation_middleware_1.validation)(user_validation_1.friendRequestSchema), user_service_1.default.sendFriendRequest);
+router.patch("/:requestId/accept", (0, authentication_middleware_1.authentication)(token_1.TokenTypeEnum.ACCESS, [user_model_1.roleEnum.USER]), (0, validation_middleware_1.validation)(user_validation_1.friendRequestSchema), user_service_1.default.acceptFriendRequest);
 exports.default = router;
